@@ -1,0 +1,51 @@
+# Golang Build Pipeline
+# This pipeline builds the Docker image for the Go application.
+name: Build Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Tests Pipeline", "Static Code Analysis Pipeline"]
+    types:
+      - completed
+  pull_request:
+    branches:
+      - development
+  push:
+    branches:
+      - development, homolog, production
+
+jobs:
+  build:
+    name: Build application in docker image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        # Checks out the source code from the repository
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+        # Sets up the Go version for the build environment
+
+      - name: Create app.env file
+        run: touch app.env
+        # Creates the 'app.env' file
+
+      - name: Copy environment variables to app.env
+        run: |
+          echo "${{ vars.SERVER_ADDRESS }}" > app.env
+          if [ "${{ steps.branch.outputs.branch }}" = "production" ]; then
+            echo "${{ vars.PROD_APP_NAME }}" > app.env
+          elif [ "${{ steps.branch.outputs.branch }}" = "homolog" ]; then
+            echo "${{ vars.HOMOLOG_APP_NAME }}" > app.env
+          else
+            echo "${{ vars.DEV_APP_NAME }}" > app.env
+          fi
+        # Copies secret environment variables to 'app.env'
+
+      - name: Create docker image
+        run:  docker build . -t felippegaede.azurecr.io/golang-fizzbuzz:${{ github.sha }}
+      # Builds the Docker image based on the source code
