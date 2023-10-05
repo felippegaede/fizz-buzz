@@ -1,0 +1,61 @@
+# Tests Pipeline
+# This pipeline runs tests for the project on specified branches and pull requests.
+
+name: Tests Pipeline
+
+on:
+  push:
+    branches: [ development, homolog, production ]
+  pull_request:
+    branches: [ development ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: secret
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      # Sets up a PostgreSQL service for database testing
+
+    steps:
+
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      # Checks out the source code from the repository
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.21
+      id: go
+       # Sets up the Go version for the build environment
+
+
+    - name: Install golang-migrate
+      run: |
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.12.2/migrate.linux-amd64.tar.gz | tar xvz
+        sudo mv migrate.linux-amd64 /usr/bin/migrate
+        which migrate
+      # Installs the golang-migrate tool for database migrations
+
+
+    - name: Run migrations
+      run: make migrateupall
+      # Executes database migrations using 'make migrateupall' (migrate -path db/migrations -database "postgresql://root:secret@localhost:5432/test_db?sslmode=disable" -verbose up)
+
+    - name: Test
+      run: make test
+      # Runs project tests using 'make test' (go test ./...)

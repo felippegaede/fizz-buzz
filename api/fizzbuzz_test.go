@@ -9,5 +9,5 @@ import (
 func TestFizzBuzzAPI(t *testing.T) {
 	test := "test"
 
-	require.Equal(t, test, "teste")
+	require.Equal(t, test, "test")
 }

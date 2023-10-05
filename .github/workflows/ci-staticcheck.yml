@@ -1,0 +1,33 @@
+# Golang Static Code Analysis Pipeline
+# This pipeline performs static code checks on Go code to ensure code quality and compliance.
+
+name: Static Code Analysis Pipeline
+
+on:
+  pull_request:
+    branches:
+      - development
+
+jobs:
+  staticcheck:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        # Checks out the source code from the repository
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
+        # Sets up the Go version for the build environment
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+        # Installs the 'staticcheck' static analysis tool
+
+      - name: Run staticcheck
+        run: make golint
+        # Executes static code analysis using 'make golint' (staticcheck ./...)
