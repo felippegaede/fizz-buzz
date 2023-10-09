@@ -34,11 +34,11 @@ jobs:
         run: |
           echo "${{ secrets.SERVER_ADDRESS }}" > app.env
           if [ "${{ github.ref }}" = "refs/heads/production" ]; then
-            echo "${{ secrets.PROD_APP_NAME }}" > app.env
+            echo APP_NAME="${{ secrets.PROD_APP_NAME }}" > app.env
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
-            echo "${{ secrets.HOMOLOG_APP_NAME }}" > app.env
+            echo APP_NAME="${{ secrets.HOMOLOG_APP_NAME }}" > app.env
           else
-            echo "${{ secrets.DEV_APP_NAME }}" > app.env
+            echo APP_NAME="${{ secrets.DEV_APP_NAME }}" > app.env
           fi
         # Copies secret environment variables to 'app.env'
 
