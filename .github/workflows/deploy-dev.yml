@@ -1,0 +1,25 @@
+name: Deploy Development Pipeline
+
+on:
+  push:
+    branches:
+      - development
+
+jobs:
+  deploy_dev:
+    runs-on: ubuntu-latest
+
+    extends:
+      - workflow: .github/workflows/build.yml
+        # Referência para o arquivo de build
+        ref: build
+
+    steps:
+    - uses: azure/docker-login@v1
+      with:
+        login-server: felippegaede.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+        docker push felippegaede.azurecr.io/golang-fizzbuzz:${{ github.sha }}
+
